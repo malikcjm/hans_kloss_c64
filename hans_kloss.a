@@ -1,0 +1,21 @@
+!to "hans_kloss.prg", cbm
+
+*= $0800
+!binary "plan_charset.bin"
+
+*= $0c00
+
+*= $1000
+!binary "music.bin"
+
+*= $2000
+!binary "map_charset.bin"
+
+*= $2800
+!binary "stats_charset.bin"
+
+*= $3800
+!binary "intro_charset.bin"
+
+*= $4000
+!binary "rest.bin"
