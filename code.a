@@ -9,168 +9,168 @@ inline install_raster_irq(raster_line, offset)
 
 function noreturn start()
 {
-	SEI
+    SEI
 
-	JSR $1048
-	TXS
+    JSR $1048
+    TXS
 
-	LDA #$7F
-	STA $DC0D
+    LDA #$7F
+    STA $DC0D
 
-	LDA #$01
-	STA $D01A
+    LDA #$01
+    STA $D01A
 
-	LDA $90A2
-	PHA
+    LDA $90A2
+    PHA
     if (equal) 
     {
         INC $90A2
         JSR $1048
     }
-	JSR $8D0D
+    JSR $8D0D
 
     install_raster_irq(#$B2, $8B85)
-	CLI
+    CLI
 
-	LDX #$40
-	LDA #$00
-	do {
-		STA $033F,X
-		STA $037F,X
-		STA $02BF,X
-		DEX
-	} while (not equal)
+    LDX #$40
+    LDA #$00
+    do {
+        STA $033F,X
+        STA $037F,X
+        STA $02BF,X
+        DEX
+    } while (not equal)
 
-	LDX #$0D
-	STX $07F8
-	INX
-	STX $07F9
-	LDA #$0B
-	STA $07FA
+    LDX #$0D
+    STX $07F8
+    INX
+    STX $07F9
+    LDA #$0B
+    STA $07FA
 
-	LDX #$00
-	TXA
-	do {
-		STA $0C00,X
-		STA $0D00,X
-		STA $0E00,X
-		STA $0EE8,X
+    LDX #$00
+    TXA
+    do {
+        STA $0C00,X
+        STA $0D00,X
+        STA $0E00,X
+        STA $0EE8,X
 
-		INX
-	} while (not equal)
+        INX
+    } while (not equal)
 
-	LDX #$28
-	LDA #$01
-	do {
-		STA $0D8F,X
-		DEX
-	} while (not equal)
+    LDX #$28
+    LDA #$01
+    do {
+        STA $0D8F,X
+        DEX
+    } while (not equal)
 
-	JSR $8DAA
-	JSR $8D1F
+    JSR $8DAA
+    JSR $8D1F
 
-	STX $50
-	STX $51
-	STX $91CD
+    STX $50
+    STX $51
+    STX $91CD
 
-	LDA #$0F
-	STA $3D
-	STA $3E
-	JSR $8824
+    LDA #$0F
+    STA $3D
+    STA $3E
+    JSR $8824
 
-	STX $D020
-	STX $D021
+    STX $D020
+    STX $D021
 
-	LDX #$10
-	LDA #$08
-	JSR $8CC9
+    LDX #$10
+    LDA #$08
+    JSR $8CC9
 
-	LDX #$03
-	LDA #$02
-	JSR $8CD1
+    LDX #$03
+    LDA #$02
+    JSR $8CD1
 
-	LDX #$02
-	LDA #$0E
-	JSR $8CD1
+    LDX #$02
+    LDA #$0E
+    JSR $8CD1
 
-	do {
-		LDA $6DD1,X
-		STA $D800,X
-		LDA $6ED1,X
-		STA $D900,X
-		LDA $6F51,X
-		STA $D980,X
-		INX
-	} while (not equal)
+    do {
+        LDA $6DD1,X
+        STA $D800,X
+        LDA $6ED1,X
+        STA $D900,X
+        LDA $6F51,X
+        STA $D980,X
+        INX
+    } while (not equal)
 
-	JSR $8D18
+    JSR $8D18
 
 loc820b:
-	LDX #$20
-	do {
-		LDA $6C10,X
-		STA $06AB,X
-		LDA $6C30,X
-		STA $06D3,X
-		LDA $6C50,X
-		STA $06FB,X
-		LDA $6C70,X
-		STA $0723,X
-		LDA $6C90,X
-		STA $0773,X
-		LDA $6CB0,X
-		STA $079B,X
+    LDX #$20
+    do {
+        LDA $6C10,X
+        STA $06AB,X
+        LDA $6C30,X
+        STA $06D3,X
+        LDA $6C50,X
+        STA $06FB,X
+        LDA $6C70,X
+        STA $0723,X
+        LDA $6C90,X
+        STA $0773,X
+        LDA $6CB0,X
+        STA $079B,X
 
-		DEX
-	} while (not equal)
+        DEX
+    } while (not equal)
 
-	STX $37
-	LDA #$05
-	STA $38
+    STX $37
+    LDA #$05
+    STA $38
 loc823a:
-	LDY #$10
-	do {
-		JSR $84E4
-		LDA $8F48,Y
-		JSR $8DCF
-		DEY
-	} while (not equal)
+    LDY #$10
+    do {
+        JSR $84E4
+        LDA $8F48,Y
+        JSR $8DCF
+        DEY
+    } while (not equal)
 
-	JSR $8DBE
-	if (equal) 
-	{
-		do {
-			JSR $84E4
-			LDA $8F49,Y
-			JSR $8DCF
-			INY
-			CPY #$10
-		} while (no carry)
+    JSR $8DBE
+    if (equal) 
+    {
+        do {
+            JSR $84E4
+            LDA $8F49,Y
+            JSR $8DCF
+            INY
+            CPY #$10
+        } while (no carry)
 
-		JSR $8DBE
-		if (equal) 
-		{
-			LDY $37
-			do {
-				LDA $6CD1,Y
-				STA $0774,X
-				LDA $6CF1,Y
-				STA $079C,X
-				INX
-				INY
-				CPX #$20
-			} while (no carry)
+        JSR $8DBE
+        if (equal) 
+        {
+            LDY $37
+            do {
+                LDA $6CD1,Y
+                STA $0774,X
+                LDA $6CF1,Y
+                STA $079C,X
+                INX
+                INY
+                CPX #$20
+            } while (no carry)
 
-			LDA $37
-			ADC #$3F
-			STA $37
-			DEC $38
-			BNE loc823a
-			JMP loc820b
-		}
-	}
+            LDA $37
+            ADC #$3F
+            STA $37
+            DEC $38
+            BNE loc823a
+            JMP loc820b
+        }
+    }
 
-	JSR $8D0D
+    JSR $8D0D
     PLA
     STA $90A2
     if (zero) {
@@ -317,8 +317,8 @@ loc8367:
 
 function f_8371()
 {
-	LDA #$00
-	STA $42
+    LDA #$00
+    STA $42
     do {
         JSR $8D6A
         LDA $45
@@ -361,19 +361,19 @@ function f_8371()
     } while (zero) 
 
 loc83bd:
-	JSR $8D30
-	JSR $8995
-	JSR $8E0F
+    JSR $8D30
+    JSR $8995
+    JSR $8E0F
 
-	do {
-		JSR $8995
-		LDX #$05
-		JSR $84E6
-		INC $43
-		LDA $43
-		AND #$1F
-		CMP #$17
-	} while (no carry)
+    do {
+        JSR $8995
+        LDX #$05
+        JSR $84E6
+        INC $43
+        LDA $43
+        AND #$1F
+        CMP #$17
+    } while (no carry)
 }
 
 #ifdef 0
