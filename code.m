@@ -1,5 +1,7 @@
 #rom.org $8160
 
+#include "vic.h"
+
 inline set_vic_irq_vector(line, addr)
 {
     LDA #line
@@ -16,7 +18,7 @@ sub_8161:
         LDA #$7F
         STA $DC0D
         LDA #1
-        STA $D01A
+        STA VIC.IRQMASK
         LDA byte_90A2
         PHA
         BNE loc_817B
@@ -42,23 +44,25 @@ loc_818C:
         STX $7F9
         LDA #$B
         STA $7FA
+
         LDX #0
         TXA
 
-loc_81A9:           
+    do {
         STA $C00,X
         STA $D00,X
         STA $E00,X
         STA $EE8,X
         INX
-        BNE loc_81A9
+    } while (not zero)
+
         LDX #$28
         LDA #1
-
-loc_81BC:               
+    do {
         STA $D8F,X
         DEX
-        BNE loc_81BC
+    } while (not zero)
+
         JSR sub_8DAA
         JSR sub_8D1F
         STX $50
@@ -68,14 +72,18 @@ loc_81BC:
         STA $3D
         STA $3E
         JSR sub_8824
-        STX $D020
-        STX $D021
+
+        STX VIC.CBORDER
+        STX VIC.CBG
+
         LDX #$10
         LDA #8
         JSR sub_8CC9
+
         LDX #3
         LDA #2
         JSR sub_8CD1
+
         LDX #2
         LDA #$E
         JSR sub_8CD1
@@ -1016,19 +1024,24 @@ loc_874A:               //g CODE XREF: ROM:8747j
         JSR sub_8CE9
         STX $50
         STX $51
+
         set_vic_irq_vector($B2, irq2)
+
         LDX #$E
         STX $3D
         INX
         STX $3E
         JSR sub_87DD
+
         LDA #5
-        STA $D022
+        STA VIC.CBG1
         LDA #$C
-        STA $D023
+        STA VIC.CBG2
+
         LDX #$10
         LDA #$A
         JSR sub_8CC9
+
         LDX #8
         LDA #1
         JSR sub_8CD1
@@ -1055,9 +1068,8 @@ loc_8793:               //g CODE XREF: ROM:8796j
         STA $4D
         BCS loc_87AB
         JMP loc_8E12
-//g ---------------------------------------------------------------------------
 
-loc_87AB:               //g CODE XREF: ROM:87A6j
+loc_87AB:
         LDX #$1E
         JSR sub_84E6
         JSR loc_8E15
@@ -1065,7 +1077,7 @@ loc_87AB:               //g CODE XREF: ROM:87A6j
         ORA #$18
         STA $43
 
-loc_87BA:               //g CODE XREF: ROM:87CAj
+loc_87BA:
         JSR sub_8995
         LDX #6
         JSR sub_84E6
@@ -1075,7 +1087,7 @@ loc_87BA:               //g CODE XREF: ROM:87CAj
         CMP #$1E
         BCC loc_87BA
         RTS
-//g ---------------------------------------------------------------------------
+
         CLC
         LDA $4C
         ADC #$32 //g '2'
@@ -1087,34 +1099,37 @@ loc_87D8:               //g CODE XREF: ROM:87D4j
         STA $4C
         JMP loc_8E12
 
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_87DD:               //g CODE XREF: sub_8161+167p
-                    //g sub_8694+A6p  ...
+sub_87DD:
         LDX #9
 
-loc_87DF:               //g CODE XREF: sub_87DD+9j
+loc_87DF:
+    do {
         LDA $8F58,X
-        STA $D020,X
+        STA VIC.CBORDER,X
         DEX
-        BNE loc_87DF
+    } while (not zero)
+
         JSR sub_8D1F
+
         LDX #$11
         LDA #$F
         JSR sub_8CC9
+
         LDX #1
         TXA
         JSR sub_8CD1
+
         LDX #4
         LDA #$F
         JSR sub_8CD1
+
         LDX #1
         TXA
         JSR sub_8CD1
+
         LDY #5
 
-loc_8807:               //g CODE XREF: sub_87DD+45j
+    do {
         LDA $8FF2,Y
         STA $74F,X
         ORA #1
@@ -1128,8 +1143,7 @@ loc_8807:               //g CODE XREF: sub_87DD+45j
         ADC #6
         TAX
         DEY
-        BNE loc_8807
-//g End of function sub_87DD
+    } while (not zero)
 
 
 //g =============== S U B   R O U T I N E =======================================
@@ -1382,9 +1396,9 @@ sub_8995:               //g CODE XREF: sub_8161:loc_82CEp
 loc_8998:               //g CODE XREF: sub_8995+6j
         BIT $D011
         BPL loc_8998
-        STA $D000
-        STA $D002
-        LDA $D010
+        STA VIC.XS0
+        STA VIC.XS1
+        LDA VIC.MSB_XS
         AND #4
         BCC loc_89AC
         ORA #3
@@ -1941,31 +1955,32 @@ sub_8CC9:               //g CODE XREF: sub_8161+81p ROM:8772p ...
         STY $53
 //g End of function sub_8CC9
 
+// A -
+// X - 
+function sub_8CD1()
+{
+    do {
+        LDY #$20
 
-//g =============== S U B   R O U T I N E =======================================
+        do {
+            STA [$52],Y
+            DEY
+        } while (not zero)
 
-
-sub_8CD1:               //g CODE XREF: sub_8161+88p sub_8161+8Fp ...
-        LDY #$20 //g ' '
-
-loc_8CD3:               //g CODE XREF: sub_8CD1+5j
-        STA [$52],Y
-        DEY
-        BNE loc_8CD3
         TAY
         CLC
         LDA $52
-        ADC #$28 //g '['
+        ADC #$28
         STA $52
-        BCC loc_8CE4
-        INC $53
 
-loc_8CE4:               //g CODE XREF: sub_8CD1+Fj
+        if (carry) {
+            INC $53
+        }
+
         TYA
         DEX
-        BNE sub_8CD1
-        RTS
-//g End of function sub_8CD1
+    } while (not zero)
+}
 
 
 //g =============== S U B   R O U T I N E =======================================
