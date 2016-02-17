@@ -22,6 +22,6 @@ byte plan_screen[0x400]
 #rom.org $4000
 #incbin "data.bin"
 
-#include "code.a"
+#include "code.m"
 #rom.end
 
