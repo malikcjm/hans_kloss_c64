@@ -21,23 +21,25 @@ sub_8161:
         STA VIC.IRQMASK
         LDA byte_90A2
         PHA
-        BNE loc_817B
-        INC byte_90A2
-        JSR $1048
 
-loc_817B:               
+        if (zero) {
+            INC byte_90A2
+            JSR $1048
+        }
+
         JSR sub_8D0D
         set_vic_irq_vector($B2, irq1)
         CLI
         LDX #$40
         LDA #0
 
-loc_818C:           
+    do {
         STA $33F,X
         STA $37F,X
         STA $2BF,X
         DEX
-        BNE loc_818C
+    } while (not zero)
+
         LDX #$D
         STX $7F8
         INX
@@ -88,7 +90,7 @@ loc_818C:
         LDA #$E
         JSR sub_8CD1
 
-loc_81F3:               
+    do {
         LDA $6DD1,X
         STA $D800,X
         LDA $6ED1,X
@@ -96,13 +98,14 @@ loc_81F3:
         LDA $6F51,X
         STA $D980,X
         INX
-        BNE loc_81F3
+    } while (not zero)
+
         JSR sub_8D18
 
 loc_820B:               
         LDX #$20
 
-loc_820D:               
+    do {
         LDA $6C10,X
         STA $6AB,X
         LDA $6C30,X
@@ -116,77 +119,82 @@ loc_820D:
         LDA $6CB0,X
         STA $79B,X
         DEX
-        BNE loc_820D
+    } while (not zero)
+
         STX $37
         LDA #5
         STA $38
 
-loc_823A:               
+do {
         LDY #$10
 
-loc_823C:               
+    do {
         JSR sub_84E4
         LDA $8F48,Y
         JSR sub_8DCF
         DEY
-        BNE loc_823C
+    } while (not zero)
+
         JSR sub_8DBE
         BNE loc_8281
 
-loc_824D:               
+    do {
         JSR sub_84E4
         LDA $8F49,Y
         JSR sub_8DCF
         INY
         CPY #$10
-        BCC loc_824D
+    } while (not carry)
+
         JSR sub_8DBE
         BNE loc_8281
         LDY $37
 
-loc_8262:               
+    do {
         LDA $6CD1,Y
         STA $774,X
         LDA $6CF1,Y
         STA $79C,X
         INX
         INY
-        CPX #$20 //g ' '
-        BCC loc_8262
+        CPX #$20
+    } while (not carry)
+
         LDA $37
         ADC #$3F //g '?'
         STA $37
         DEC $38
-        BNE loc_823A
+} while (not zero)
         JMP loc_820B
 
 loc_8281:               
         JSR sub_8D0D
         PLA
         STA byte_90A2
-        BNE loc_828D
+    if (zero) {
         JSR sub_8DDB
-
-loc_828D:               
+    }
         JSR sub_8CB4
         JSR sub_8DAA
         LDX #$C
 
-loc_8295:               
+    do {
         LDA #$41
         STA $6B5,X
         DEX
         LDA #$40
         STA $6B5,X
         DEX
-        BNE loc_8295
+    } while (not zero)
+
         TXA
         LDX #$2D
 
-loc_82A6:               
+    do {
         STA $37,X
         DEX
-        BNE loc_82A6
+    } while (not zero)
+
         DEC $64
         INX
         STX $48
@@ -206,14 +214,13 @@ loc_82A6:
         JSR sub_8D18
 
 loc_82CE:               
-                    //g sub_8161+20Dj
         JSR sub_8995
         LDA $57
-        BNE loc_82DA
-        DEC $57
-        JSR sub_8824
+        if (zero) {
+            DEC $57
+            JSR sub_8824
+        }
 
-loc_82DA:               
         LDX #2
         JSR sub_84E6
         JSR sub_8D6F
@@ -222,10 +229,10 @@ loc_82DA:
         ADC #$40 //g '@'
         TAY
         JSR sub_8D84
-        BMI loc_82EF
-        JSR sub_8371
+        if (not minus)  {
+            JSR sub_8371
+        }
 
-loc_82EF:               
         STA $3A
         JSR sub_84FF
         JSR sub_8C86
@@ -234,13 +241,12 @@ loc_82EF:
         BNE loc_831F
         JSR sub_84E4
         LDA byte_90A2
-        BNE loc_830E
-        INC byte_90A2
-        JSR $1048
-        JMP loc_8316
-//g ---------------------------------------------------------------------------
+        if (zero) {
+            INC byte_90A2
+            JSR $1048
+            JMP loc_8316
+        }
 
-loc_830E:               
         LDA #0
         STA byte_90A2
         JSR sub_8DDB
@@ -257,7 +263,7 @@ loc_831F:
         CMP #$3D //g '='
         BNE loc_834C
 
-loc_8325:               
+do {
         JSR sub_8490
         ORA #9
         STA $43
@@ -265,42 +271,40 @@ loc_8325:
         LDA #7
         STA $3B
 
-loc_8332:               
+    do {
         JSR sub_8995
         LDX $3B
         LDY $8FEB,X
 
-loc_833A:               
-        JSR sub_84E4
-        LDA $46
-        BNE loc_834C
-        DEY
-        BNE loc_833A
+        do { 
+            JSR sub_84E4
+            LDA $46
+            BNE loc_834C
+
+            DEY
+        } while (not zero)
         INC $43
         DEC $3B
-        BNE loc_8332
-        BEQ loc_8325
+    } while (not zero)
+} while (zero)
 
 loc_834C:               
-                    //g sub_8161+1DEj
         LDX #0
         STX $62
-        CMP #$3C //g '<'
-        BEQ loc_8364
-        CMP #$3A //g ':'
-        BNE loc_835C
-        DEX
-        JSR sub_8694
-
+        CMP #$3C
+    if (not zero) {
+        CMP #$3A
+        if (zero) {
+            DEX
+            JSR sub_8694
+        }
 loc_835C:               
-                    //g sub_8161+1F5j
         LDA $4D
         BEQ loc_8364
         LDA $4C
         BNE loc_8367
-
+    }
 loc_8364:               
-                    //g sub_8161+1FDj
         JSR sub_8627
 
 loc_8367:               
@@ -577,39 +581,31 @@ loc_84DA:               //g CODE XREF: sub_8456+27j sub_84A8+24j
         INC $44
         LDA $44
         LSR A
-        BCC locret_84E3
-        INC $43
+        if (carry) {
+            INC $43
+        }
 
-locret_84E3:                //g CODE XREF: sub_84A8+37j
         RTS
-//g End of function sub_84A8
 
+function sub_84E4()
+{
+    LDX #1
 
-//g =============== S U B   R O U T I N E =======================================
+sub_84E6:
+    do {
+        do { 
+            BIT $D011
+        } while (minus)
 
+        do {
+            BIT $D011
+        } while (plus)
 
-sub_84E4:               //g CODE XREF: sub_8161:loc_823Cp
-                    //g sub_8161:loc_824Dp ...
-        LDX #1
-//g End of function sub_84E4
-
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_84E6:               //g CODE XREF: sub_8161+17Bp
-                    //g sub_8371+44p  ...
-        BIT $D011
-        BMI sub_84E6
-
-loc_84EB:               //g CODE XREF: sub_84E6+8j
-        BIT $D011
-        BPL loc_84EB
-        DEX
-        BNE sub_84E6
+            DEX
+    } while (not zero)
 
 locret_84F3:                
-        RTS
+}
 
 //g =============== S U B   R O U T I N E =======================================
 
@@ -821,7 +817,7 @@ loc_8600:               //g CODE XREF: sub_84FF+126j
 //g =============== S U B   R O U T I N E =======================================
 
 
-sub_8627:               //g CODE XREF: sub_8161:loc_8364p
+sub_8627:
         JSR sub_8CE9
         LDX #$A
         JSR sub_84E6
@@ -832,7 +828,7 @@ sub_8627:               //g CODE XREF: sub_8161:loc_8364p
         JSR sub_8D20
         LDY #0
 
-loc_8642:               //g CODE XREF: sub_8627+2Bj
+    do {
         LDA $8FC1,X
         STA $540,Y
         ORA #1
@@ -841,16 +837,15 @@ loc_8642:               //g CODE XREF: sub_8627+2Bj
         INY
         INX
         CPX #$14
-        BCC loc_8642
+    } while (not carry)
+
         JSR sub_8D18
-        LDX #$64 //g 'd'
+        LDX #$64
         JSR sub_84E6
         JSR sub_8161
 
-locret_865F:                //g CODE XREF: sub_84FF+E2j
-                    //g sub_84FF+166j ...
+locret_865F:   
         RTS
-//g End of function sub_8627
 
 //g ---------------------------------------------------------------------------
 //g START   OF FUNCTION CHUNK FOR sub_84FF
@@ -882,13 +877,7 @@ loc_8682:
         TAX
         JMP loc_8510
 //g END OF FUNCTION CHUNK   FOR sub_84FF
-byte s1[] = {
-         $E6 //g æ
-        , $4B //g K
-        , $4C //g L
-        , $12
-        , $8E //g Ž
-}
+byte s1[] = { $E6 , $4B , $4C , $12 , $8E }
 //g ---------------------------------------------------------------------------
         LDX #1
 //g ---------------------------------------------------------------------------
@@ -1388,8 +1377,7 @@ loc_8939:
 //g =============== S U B   R O U T I N E =======================================
 
 
-sub_8995:               //g CODE XREF: sub_8161:loc_82CEp
-                    //g sub_8161:loc_8332p ...
+sub_8995:
         LDA $40
         ASL A
 
@@ -1457,36 +1445,24 @@ loc_89F0:               //g CODE XREF: sub_8995+57j
 //g End of function sub_8995
 
 
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_89F7:               //g CODE XREF: sub_8456+2Bp sub_84A8+28p ...
+sub_89F7:
         LDA #0
 
-loc_89F9:               //g CODE XREF: sub_8995+60j
+loc_89F9:
         STA $D015
         RTS
-//g End of function sub_89F7
 
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_89FD:               //g CODE XREF: sub_8995:loc_89DEp
+sub_89FD:
         JSR sub_8A00
-//g End of function sub_89FD
 
 
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8A00:               //g CODE XREF: sub_89FDp
+sub_8A00:
         LDA [$52],Y
         STA $340,X
         INX
         INY
         RTS
-//g End of function sub_8A00
+
         LDA #$1A
         JSR sub_8C5F
         LDA $47
@@ -1924,8 +1900,7 @@ loc_8CA6:               //g CODE XREF: sub_8C86+13j
 //g =============== S U B   R O U T I N E =======================================
 
 
-sub_8CB4:               //g CODE XREF: sub_8161:loc_828Dp
-                    //g sub_8694+A3p
+sub_8CB4:
         LDA #$B2 //g '²'
         LDX #8
         LDY #$8A //g 'Š'
@@ -1986,7 +1961,8 @@ function sub_8CD1()
 //g =============== S U B   R O U T I N E =======================================
 
 
-sub_8CE9:               //g CODE XREF: sub_8627p  sub_8694+2p ...
+function sub_8CE9()
+{
         LDX #4
         JSR sub_84E6
         STX $D023
@@ -2000,163 +1976,125 @@ sub_8CE9:               //g CODE XREF: sub_8627p  sub_8694+2p ...
         JSR sub_84E6
         JSR sub_89F7
         JSR sub_8D1F
-//g End of function sub_8CE9
 
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8D0D:               //g CODE XREF: sub_8161:loc_817Bp
-                    //g sub_8161:loc_8281p ...
+sub_8D0D:
+    do {
         LDA $D011
-        BPL sub_8D0D
-        AND #$6F //g 'o'
+    } while (plus)
+    AND #$6F
 
-loc_8D14:               //g CODE XREF: sub_8D18+5j
-        STA $D011
-        RTS
-//g End of function sub_8D0D
-
-
-//g =============== S U B   R O U T I N E =======================================
+loc_8D14:
+    STA $D011
+}
 
 
-sub_8D18:               //g CODE XREF: sub_8161+A7p
-                    //g sub_8161+16Ap ...
-        JSR sub_8D0D
-        ORA #$10
-        BNE loc_8D14
-//g End of function sub_8D18
+function sub_8D18()
+{
+    JSR sub_8D0D
+    ORA #$10
+    BNE loc_8D14
 
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8D1F:               //g CODE XREF: sub_8161+64p sub_87DD+Bp ...
+sub_8D1F:
         TXA
-//g End of function sub_8D1F
 
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8D20:               //g CODE XREF: sub_8627+16p sub_8D20+Dj
+sub_8D20:
+    do {
         STA $D800,X
         STA $D900,X
         STA $DA00,X
         STA $DAE8,X
         INX
-        BNE sub_8D20
-        RTS
-//g End of function sub_8D20
+    } while (not zero)
+}
 
 
 //g =============== S U B   R O U T I N E =======================================
 
 
-sub_8D30:               //g CODE XREF: sub_8371:loc_83BDp
+function sub_8D30()
+{
         LDA $41
         AND #$F0 //g 'ð'
         ORA #2
         STA $41
-        RTS
-//g End of function sub_8D30
+}
 
+function sub_8D39()
+{
+    CLC
+    ADC $41
+    CMP #$8D
 
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8D39:               //g CODE XREF: sub_8371+20p
-        CLC
-        ADC $41
-        CMP #$8D //g ''
-        BCC loc_8D67
+    if (carry) {
         JSR sub_89F7
         INC $3E
         JSR sub_8824
+
         LDA #$13
         STA $3A
         LDA #$30 //g '0'
-        BNE loc_8D67
-//g End of function sub_8D39
-
-
-//g =============== S U B   R O U T I N E =======================================
-
+        if (zero) {
 
 sub_8D50:               
-        CLC
-        SBC $41
-        EOR #$FF
-        CMP #$30 
-        BCS loc_8D67
-        JSR sub_89F7
-        DEC $3E
-        JSR sub_8824
-        LDA #$C
-        STA $3A
-        LDA #$8D //g ''
+            CLC
+            SBC $41
+            EOR #$FF
+            CMP #$30 
+            if (not carry) {
+                JSR sub_89F7
+                DEC $3E
+                JSR sub_8824
+                LDA #$C
+                STA $3A
+                LDA #$8D
+            }
+        }
+    }
 
-loc_8D67:
-        STA $41
-        RTS
-//g End of function sub_8D50
+    STA $41
+}
 
+function sub_8D6A()
+{
+    LDA $43
+    CMP #$20
+}
 
-//g =============== S U B   R O U T I N E =======================================
+function sub_8D6F()
+{
+    SEC
+    LDA $41
+    SBC #$32 //g '2'
+    AND #$F0 //g 'ð'
+    ASL A
+    STA $37
+    SEC
+    LDA $40
+    SBC #$18
+    LSR A
+    LSR A
+    CLC
+    ADC $37
+    TAY
+sub_8D84:
+    LDA $90CD,Y
+    LSR A
+    TAX
+    LDA $8F62,X
+}
 
-
-sub_8D6A:               //g CODE XREF: sub_8371:loc_8375p
-                    //g sub_83D9+11p  ...
-        LDA $43
-        CMP #$20 //g ' '
-        RTS
-//g End of function sub_8D6A
-
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8D6F:               //g CODE XREF: sub_8161+17Ep
-                    //g sub_8371+2Ap  ...
-        SEC
-        LDA $41
-        SBC #$32 //g '2'
-        AND #$F0 //g 'ð'
-        ASL A
-        STA $37
-        SEC
-        LDA $40
-        SBC #$18
-        LSR A
-        LSR A
-        CLC
-        ADC $37
-        TAY
-//g End of function sub_8D6F
-
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8D84:               //g CODE XREF: sub_8161+186p
-                    //g sub_8371+32p  ...
-        LDA $90CD,Y
-        LSR A
-        TAX
-        LDA $8F62,X
-        RTS
-
-sub_8D8D:               
+function sub_8D8D()
+{
         STY $56
         LDY #0
 
 loc_8D91:               
         SEC
         SBC #$A
-        BCC loc_8D99
-        INY
-        BCS loc_8D91
+        if (carry) {
+            INY
+            BCS loc_8D91
+        }
 
 loc_8D99:               
         ADC #$A
@@ -2166,92 +2104,58 @@ loc_8D99:
         JSR sub_8DA3
         PLA
 
-
-
-
-
-
 sub_8DA3:               
         ORA #$10
         STA $777,Y
         INY
-        RTS
+}
 
+function sub_8DAA()
+{
+    LDX #0
+    LDA #$2E
 
-
-
-
-
-
-sub_8DAA:               //g CODE XREF: sub_8161+61p
-                    //g sub_8161+12Fp ...
-        LDX #0
-        LDA #$2E //g '.'
-
-loc_8DAE:               //g CODE XREF: sub_8DAA+11j
+    do {
         STA $400,X
         STA $500,X
         STA $600,X
         STA $6E8,X
         INX
-        BNE loc_8DAE
-        RTS
-//g End of function sub_8DAA
+    } while (not zero)
+}
 
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8DBE:               //g CODE XREF: sub_8161+E7p sub_8161+FAp ...
+function sub_8DBE()
+{
         JSR sub_84E4
         JSR sub_8DCA
-        BNE locret_8DC9
-        DEY
-        BNE sub_8DBE
+        if (zero) {
+            DEY
+            BNE sub_8DBE
+        }
+}
 
-locret_8DC9:                //g CODE XREF: sub_8DBE+6j
-        RTS
-//g End of function sub_8DBE
-
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8DCA:
+function sub_8DCA()
+{
         LDA $46
         AND #$10
-        RTS
-//g End of function sub_8DCA
+}
 
+function sub_8DCF()
+{
+    LDX #$20
 
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8DCF:               //g CODE XREF: sub_8161+E1p sub_8161+F2p
-        LDX #$20 //g ' '
-
-loc_8DD1:               //g CODE XREF: sub_8DCF+9j
+    do {
         STA $DB73,X
         STA $DB9B,X
         DEX
-        BNE loc_8DD1
-        RTS
-//g End of function sub_8DCF
+    } while (not zero)
+}
 
 
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8DDB:               //g CODE XREF: sub_8161+129p
-                    //g sub_8161+1B2p
+sub_8DDB:
         JSR sub_8DDE
-//g End of function sub_8DDB
-
-
-//g =============== S U B   R O U T I N E =======================================
-
-
-sub_8DDE:               //g CODE XREF: sub_8DDBp
+function sub_8DDE()
+{
         JSR sub_84E4
         LDA #8
         STA $D404
@@ -2260,20 +2164,19 @@ sub_8DDE:               //g CODE XREF: sub_8DDBp
         TXA
         LDX #$18
 
-loc_8DEF:               //g CODE XREF: sub_8DDE+1Bj
+    do {
         STA $D3FF,X
         STA $90A8,X
         STA $90B5,X
         DEX
-        BNE loc_8DEF
+    } while (not zero)
         LDA #7
         STA $D403
         STA $D40A
         STA $D411
         LDA #$F
         STA $D418
-        RTS
-//g End of function sub_8DDE
+}
 
 loc_8E0C:               
         LDA #0
@@ -2285,77 +2188,73 @@ loc_8E0F:
         byte a1[] = {0x2C }
 loc_8E12:               
         LDA #9
-
         byte a2[] = {0x2C }
 loc_8E15:               
         LDA #$D
-
         byte a3[] = {0x2C }
+
 loc_8E18:               
         LDA #$10
-
         byte a4[] = {0x2C }
 
 loc_8E1B:               
         LDA #$16
-
         byte a5[] = {0x2C }
+
 loc_8E1E:               
         LDA #$18
-
         byte a6[] = {0x2C }
 
         LDA #$1D
 
         LDX byte_90A2
-        BNE locret_8E71
-        PHA
-        AND #3
-        TAY
-        ASL A
-        ASL A
-        STA $60
-        ASL A
-        ADC $60
-        TAX
-        LDA $90A3,Y
-        TAY
-        LDA #0
-        STA $D404,Y
-        STA $D405,Y
-        STA $D406,Y
-        PLA
-        LSR A
-        LSR A
-        ASL A
-        STA $60
-        ASL A
-        ASL A
-        ADC $60
-        TAY
-        LDA #$A
-        STA $60
+    if (zero) {
+            PHA
+            AND #3
+            TAY
+            ASL A
+            ASL A
+            STA $60
+            ASL A
+            ADC $60
+            TAX
+            LDA $90A3,Y
+            TAY
+            LDA #0
+            STA $D404,Y
+            STA $D405,Y
+            STA $D406,Y
+            PLA
+            LSR A
+            LSR A
+            ASL A
+            STA $60
+            ASL A
+            ASL A
+            ADC $60
+            TAY
+            LDA #$A
+            STA $60
 
-loc_8E52:               //g CODE XREF: sub_84F4+968j
-        LDA $8111,Y
-        STA $90A9,X
-        INX
-        INY
-        DEC $60
-        BNE loc_8E52
-        LDA #0
-        STA $90A9,X
-        LDA $90A5,X
-        BNE loc_8E6E
-        INC $90A9,X
-        LDA $90A8,X
+        do {
+            LDA $8111,Y
+            STA $90A9,X
+            INX
+            INY
+            DEC $60
+        } while (not zero)
 
-loc_8E6E:               //g CODE XREF: sub_84F4+972j
-        STA $90AA,X
+            LDA #0
+            STA $90A9,X
+            LDA $90A5,X
+            if (zero) {
+                INC $90A9,X
+                LDA $90A8,X
+            }
+            STA $90AA,X
 
-locret_8E71:                //g CODE XREF: sub_84F4+932j
+    }
         RTS
-//g END OF FUNCTION CHUNK   FOR sub_84F4
 
 //g =============== S U B   R O U T I N E =======================================
 
@@ -2470,698 +2369,45 @@ loc_8F24:
         RTS
 //g ---------------------------------------------------------------------------
 byte s7[]= {
-        1
-        ,   7
-        ,  $D
-        ,   3
-        ,  $F
-        ,   5
-        ,  $A
-        ,  $C
-        ,  $E
-        ,   8
-        ,   4
-        ,  $B
-        ,   2
-        ,   6
-        ,   9
-        ,   0
-        ,   0
-        ,   9
-        ,  $C
-        ,   0
-        ,   8
-        ,   7,
-byte_8F5F:  5 , 5
-        ,  $E
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        , $80 //g €
-        ,   1
-        ,   2
-        ,   3
-        ,   4
-        ,   7
-        ,   5
-        ,   6
-        , $80 //g €
-        , $80 //g €
-        ,   0
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,  $C
-        , $81 //g 
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   0
-        ,  $D
-        , $81 //g 
-        , $81 //g 
-        , $81 //g 
-        ,   8
-        ,  $A
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   0
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,  $E
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   0
-        , $80 //g €
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   0
-        , $80 //g €
-        ,   0
-        ,   0
-        ,   1
-        ,   1
-        ,   2
-        ,   2
-        ,   2
-        ,   3
-        ,   3
-        ,   4
-        ,   4
-        ,   3
-        ,   2
-        ,   1
-        ,   1
-        ,   1
-        ,   2
-        ,   2
-        ,   1
-        ,   1
-        ,   1
-        ,   1
-        ,   1
-        ,   1
-        ,   0
-        ,   1
-        ,   1
-        ,   1
-        ,   2
-        ,   2
-        ,   2
-        ,   3
-        ,   4
-        ,   2
-        , $1E
-        , $3C //g <
-        , $9A //g š
-        , $3E //g >
-        , $54 //g T
-        , $56 //g V
-        , $58 //g X
-        , $5A //g Z
-        , $5C //g \
-        , $56 //g V
-        , $5E //g ^
-        , $3C //g <
-        , $9A //g š
-        , $F8 //g ø
-        , $FA //g ú
-        , $FC //g ü
-        , $7C //g |
-        , $7C //g |
-        , $7E //g ~
-        , $20
-        , $8E //g Ž
-        , $87 //g ‡
-        , $86 //g †
-        , $8C //g Œ
-        , $86 //g †
-        , $8F //g 
-        , $86 //g †
-        , $9D //g 
-        , $87 //g ‡
-        , $CC //g Ì
-        , $87 //g ‡
-        , $3F //g ?
-        , $87 //g ‡
-        , $FF
-        , $1E
-        , $69 //g i
-        , $6E //g n
-        , $5F //g _
-        , $50 //g P
-        ,   0
-        , $59 //g Y
-        , $62 //g b
-        ,  $A
-        ,  $A
-        ,  $A
-        ,  $F
-        , $64 //g d
-        , $1E
-        , $64 //g d
-        , $36 //g 6
-        , $34 //g 4
-        , $32 //g 2
-        , $3C //g <
-        , $3A //g :
-        , $3F //g ?
-        , $FF
-        , $C0 //g À
-        , $2A //g *
-        , $AA //g ª
-        , $80 //g €
-        , $2A //g *
-        , $AA //g ª
-        , $80 //g €
-        , $2A //g *
-        , $AA //g ª
-        , $80 //g €
-        , $15
-        , $55 //g U
-        , $40 //g @
-        ,   1
-        ,   3
-        ,   7
-        , $15
-        , $23 //g #
-        , $24 //g $
-        , $46 //g F
-        , $66 //g f
-        , $74 //g t
-        , $15
-        , $34 //g 4
-        , $41 //g A
-        , $45 //g E
-        , $48 //g H
-        , $51 //g Q
-        , $53 //g S
-        , $55 //g U
-        , $92 //g ’
-        , $61 //g a
-        , $64 //g d
-        , $67 //g g
-        , $94 //g ”
-        , $68 //g h
-        , $31 //g 1
-        ,  $C
-        , $9B //g ›
-        , $68 //g h
-        , $38 //g 8
-        ,  $C
-        , $A2 //g ¢
-        , $68 //g h
-        , $3F //g ?
-        ,  $C
-        , $D3 //g Ó
-        , $68 //g h
-        , $A9 //g ©
-        ,  $C
-        , $DA //g Ú
-        , $68 //g h
-        , $B0 //g °
-        ,  $C
-        , $E1 //g á
-        , $68 //g h
-        , $B7 //g ·
-        ,  $C
-        , $12
-        , $69 //g i
-        , $21 //g !
-        ,  $D
-        , $19
-        , $69 //g i
-        , $28 //g [
-        ,  $D
-        , $20
-        , $69 //g i
-        , $2F //g /
-        ,  $D
-        , $51 //g Q
-        , $69 //g i
-        , $BC //g ¼
-        ,  $D
-        , $59 //g Y
-        , $69 //g i
-        , $C4 //g Ä
-        ,  $D
-        , $61 //g a
-        , $69 //g i
-        , $CC //g Ì
-        ,  $D
-        , $69 //g i
-        , $69 //g i
-        , $D4 //g Ô
-        ,  $D
-        , $D1 //g Ñ
-        , $69 //g i
-        , $5C //g \
-        ,  $E
-        , $D9 //g Ù
-        , $69 //g i
-        , $64 //g d
-        ,  $E
-        , $E1 //g á
-        , $69 //g i
-        , $6C //g l
-        ,  $E
-        , $E9 //g é
-        , $69 //g i
-        , $74 //g t
-        ,  $E
-        , $51 //g Q
-        , $6A //g j
-        , $FC //g ü
-        ,  $E
-        , $59 //g Y
-        , $6A //g j
-        ,   4
-        ,  $F
-        , $61 //g a
-        , $6A //g j
-        ,  $C
-        ,  $F
-        , $69 //g i
-        , $6A //g j
-        , $14
-        ,  $F
-        , $18
-        , $30 //g 0
-        , $48 //g H
-        , $60 //g `
-        , $78 //g x
-        , $90 //g 
-        , $A8 //g ¨
-        ,   5
-        ,  $D
-        ,  $D
-        ,   2
-        ,  $D
-        ,  $D
-        ,  $D
-        ,  $D
-        ,   5
-        ,  $D
-        ,  $D
-        ,   2
-        , $A6 //g ¦
-        , $A7 //g §
-        , $A8 //g ¨
-        , $A9 //g ©
-        , $AA //g ª
-        , $AB //g «
-        , $A0 //g  
-        , $A1 //g ¡
-        , $A2 //g ¢
-        , $A3 //g £
-        , $A4 //g ¤
-        , $A5 //g ¥
-        ,   3
-        , $3F //g ?
-        ,   3
-        , $3F //g ?
-        ,   3
-        , $3F //g ?
-        ,   3
-        , $3F //g ?
-        ,   3
-        , $2E //g .
-        , $16
-        , $36 //g 6
-        ,   4
-        , $32 //g 2
-        , $16
-        , $22 //g "
-        , $19
-        , $1F,
+  1, 7, $D, 3, $F, 5, $A, $C, $E, 8, 4, $B, 2, 6, 9, 0, 0, 9, $C, 0, 8, 7,
+byte_8F5F:  5 , 5 ,  $E ,   0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   0
+         , $80 , 1 , 2 , 3 , 4 , 7 , 5 , 6 , $80 , $80 , 0 , $80 , 0 , 0 , 0 , 0 , $C , $81 , 0 , 0
+        ,   0 ,   0 ,   0 ,   0 , $80 ,   0 ,   0 ,   0 ,  $D , $81 , $81 , $81 ,   8 ,  $A , $80 ,   0 ,   0 ,   0 , $80 ,   0
+        ,   0 ,   0 ,   0 ,   0 ,  $E , $80 ,   0 ,   0 ,   0 , $80 , $80 ,   0 ,   0 ,   0 , $80 ,   0 ,   0 ,   1 ,   1 ,   2
+        ,   2 ,   2 ,   3 ,   3 ,   4 ,   4 ,   3 ,   2 ,   1 ,   1 ,   1 ,   2 ,   2 ,   1 ,   1 ,   1 ,   1 ,   1 ,   1 ,   0
+        ,   1 ,   1 ,   1 ,   2 ,   2 ,   2 ,   3 ,   4 ,   2 , $1E , $3C , $9A  , $3E , $54 , $56 , $58 , $5A , $5C , $56 , $5E
+        , $3C , $9A  , $F8 , $FA , $FC , $7C , $7C , $7E , $20 , $8E  , $87  , $86  , $8C  , $86  , $8F  , $86  , $9D  , $87  , $CC , $87  
+        , $3F , $87  , $FF , $1E , $69 , $6E , $5F , $50 ,   0 , $59 , $62 ,  $A ,  $A ,  $A ,  $F , $64 , $1E , $64 , $36 , $34
+        , $32 , $3C , $3A , $3F , $FF , $C0 , $2A , $AA , $80  , $2A , $AA , $80  , $2A , $AA , $80  , $15 , $55 , $40 ,   1 ,   3
+        ,   7 , $15 , $23 , $24 , $46 , $66 , $74 , $15 , $34 , $41 , $45 , $48 , $51 , $53 , $55 , $92  , $61 , $64 , $67 , $94  
+        , $68 , $31 ,  $C , $9B  , $68 , $38 ,  $C , $A2 , $68 , $3F ,  $C , $D3 , $68 , $A9 ,  $C , $DA , $68 , $B0 ,  $C , $E1
+        , $68 , $B7 ,  $C , $12 , $69 , $21 ,  $D , $19 , $69 , $28 ,  $D , $20 , $69 , $2F ,  $D , $51 , $69 , $BC ,  $D , $59
+        , $69 , $C4 ,  $D , $61 , $69 , $CC ,  $D , $69 , $69 , $D4 ,  $D , $D1 , $69 , $5C ,  $E , $D9 , $69 , $64 ,  $E , $E1
+        , $69 , $6C ,  $E , $E9 , $69 , $74 ,  $E , $51 , $6A , $FC ,  $E , $59 , $6A ,   4 ,  $F , $61 , $6A ,  $C ,  $F , $69
+        , $6A , $14 ,  $F , $18 , $30 , $48 , $60 , $78 , $90  , $A8 ,   5 ,  $D ,  $D ,   2 ,  $D ,  $D ,  $D ,  $D ,   5 ,  $D
+        ,  $D ,   2 , $A6 , $A7 , $A8 , $A9 , $AA , $AB , $A0 , $A1 , $A2 , $A3 , $A4 , $A5 ,   3 , $3F ,   3 , $3F ,   3 , $3F
+        ,   3 , $3F ,   3 , $2E , $16 , $36 ,   4 , $32 , $16 , $22 , $19 , $1F,
+
 byte_90A1:   0,
-byte_90A2:   1,     
-            0
-        ,   7
-        ,  $E,
-byte_90A6:   1          ,
-byte_90A7:   $60        ,
-byte_90A8:   4          ,
-         $81 //g 
-        ,   0
-        , $F8 //g ø
-        ,   7
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   1
-        ,   0
-        , $81 //g 
-        , $81 //g 
-        , $56 //g V
-        ,   8
-        , $7F //g 
-        ,   9
-        ,   7
-        , $7F //g 
-        , $13
-        , $78 //g x
-        , $D3 //g Ó
-        ,   4
-        , $41 //g A
-        ,   5
-        , $BC,
-byte_90C4: $BB, 0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   0
-        ,   1
-        ,   0
-        , $48 //g H
-        , $49 //g I
-        , $48 //g H
-        , $49 //g I
-        , $48 //g H
-        , $49 //g I
-        , $5A //g Z
-        , $5B //g [
-        , $5C //g \
-        , $5D //g ]
-        , $5C //g \
-        , $5D //g ]
-        , $5C //g \
-        , $5D //g ]
-        , $5C //g \
-        , $5D //g ]
-        ,   0
-        ,   1
-        ,   2
-        ,   3
-        ,   4
-        ,   5
-        ,   6
-        ,   7
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7C //g |
-        , $7D //g }
-        , $78 //g x
-        , $79 //g y
-        , $4A //g J
-        , $4B //g K
-        , $4C //g L
-        , $4D //g M
-        , $4C //g L
-        , $4D //g M
-        , $4E //g N
-        , $4F //g O
-        , $20
-        , $21 //g !
-        , $22 //g "
-        , $23 //g #
-        , $24 //g $
-        , $25 //g %
-        , $26 //g &
-        , $27 //g '
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7A //g z
-        , $7B //g {
-        , $78 //g x
-        , $79 //g y
-        , $7E //g ~
-        , $7F //g 
-        , $48 //g H
-        , $49 //g I
-        , $48 //g H
-        , $49 //g I
-        , $50 //g P
-        , $51 //g Q
-        ,   8
-        ,   9
-        ,  $A
-        ,  $B
-        ,  $C
-        ,  $D
-        ,  $E
-        ,  $F
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7C //g |
-        , $7D //g }
-        , $78 //g x
-        , $79 //g y
-        , $7E //g ~
-        , $7F //g 
-        , $54 //g T
-        , $55 //g U
-        , $52 //g R
-        , $53 //g S
-        , $50 //g P
-        , $51 //g Q
-        , $28 //g [
-        , $29 //g ]
-        , $2A //g *
-        , $2B //g +
-        , $2C //g ,
-        , $2D //g -
-        , $2E //g .
-        , $2F //g /
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7A //g z
-        , $7B //g {
-        , $78 //g x
-        , $79 //g y
-        , $7E //g ~
-        , $7F //g 
-        , $58 //g X
-        , $59 //g Y
-        , $56 //g V
-        , $57 //g W
-        , $50 //g P
-        , $51 //g Q
-        , $28 //g [
-        , $29 //g ]
-        , $10
-        , $11
-        , $12
-        , $13
-        , $14
-        , $15
-        , $16
-        , $17
-        , $18
-        , $19
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7C //g |
-        , $7D //g }
-        , $6E //g n
-        , $6F //g o
-        , $6C //g l
-        , $6D //g m
-        , $6A //g j
-        , $6B //g k
-        , $68 //g h
-        , $69 //g i
-        , $50 //g P
-        , $51 //g Q
-        , $28 //g [
-        , $29 //g ]
-        , $30 //g 0
-        , $31 //g 1
-        , $32 //g 2
-        , $33 //g 3
-        , $34 //g 4
-        , $35 //g 5
-        , $36 //g 6
-        , $37 //g 7
-        , $38 //g 8
-        , $39 //g 9
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7A //g z
-        , $7B //g {
-        , $70 //g p
-        , $71 //g q
-        , $72 //g r
-        , $73 //g s
-        , $76 //g v
-        , $77 //g w
-        , $64 //g d
-        , $65 //g e
-        , $66 //g f
-        , $67 //g g
-        , $28 //g [
-        , $29 //g ]
-        , $1A
-        , $1B
-        , $3A //g :
-        , $3B //g ;
-        , $3C //g <
-        , $3D //g =
-        , $3E //g >
-        , $3F //g ?
-        , $1C
-        , $1D
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9 //g É
-        , $48 //g H
-        , $49 //g I
-        , $7C //g |
-        , $7D //g }
-        , $78 //g x
-        , $79 //g y
-        , $74 //g t
-        , $75 //g u
-        , $76 //g v
-        , $77 //g w
-        , $62 //g b
-        , $63 //g c
-        , $60 //g `
-        , $61 //g a
-        , $28 //g [
-        , $29 //g ]
-        , $1E
-        , $1F
-        , $40 //g @
-        , $41 //g A
-        , $42 //g B
-        , $43 //g C
-        , $44 //g D
-        , $45 //g E
-        , $46 //g F
-        , $47 //g G
-        , $C8 //g È
-        , $C9 //g É
-        , $C8 //g È
-        , $C9,
-byte_91CD:   0          
-        , $28 //g [
-        , $26 //g &
-        , $28 //g [
-        , $B4 //g ´
-        , $18
-        , $34 //g 4
-        ,   7
-        , $B0 //g °
-        ,   7
-        , $A8 //g ¨
-        , $35 //g 5
-        , $28 //g [
-        , $34 //g 4
-        , $36 //g 6
-        , $34 //g 4
-        , $30 //g 0
-        , $A7 //g §
-        , $AA //g ª
-        , $A7 //g §
-        , $B0 //g °
-        , $A8 //g ¨
-        , $AE //g ®
-        , $A8 //g ¨
-        , $B4 //g ´
-        , $79 //g y
-        , $AE //g ®
-        , $29 //g ]
-        , $A8 //g ¨
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $BD //g ½
-        , $A2 //g ¢
-        }
+byte_90A2:   1,     0 ,   7 ,  $E,
+byte_90A6:   1 ,
+byte_90A7:   $60 ,
+byte_90A8: 4, $81, 0, $F8, 7, 0, 0, 0, 0, 0, 0, 1, 0, $81, $81, $56, 8, $7F, 9, 7, $7F, $13, $78, $D3, 4, $41, 5, $BC,
+byte_90C4: $BB, 0 ,   0 ,   0 ,   0 ,   0 ,   0 ,   1 ,   0 , $48 , $49 , $48 , $49 , $48 , $49 , $5A , $5B , $5C , $5D , $5C , $5D
+         , $5C , $5D , $5C , $5D ,   0 ,   1 ,   2 ,   3 ,   4 ,   5 ,   6 ,   7 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9
+        , $C8 , $C9 , $48 , $49 , $7C , $7D , $78 , $79 , $4A , $4B , $4C , $4D , $4C , $4D , $4E , $4F , $20 , $21 , $22 , $23
+        , $24 , $25 , $26 , $27 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $48 , $49 , $7A , $7B , $78 , $79
+        , $7E , $7F , $48 , $49 , $48 , $49 , $50 , $51 ,   8 ,   9 ,  $A ,  $B ,  $C ,  $D ,  $E ,  $F , $C8 , $C9 , $C8 , $C9
+        , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $48 , $49 , $7C , $7D , $78 , $79 , $7E , $7F , $54 , $55 , $52 , $53 , $50 , $51
+        , $28 , $29 , $2A , $2B , $2C , $2D , $2E , $2F , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $48 , $49
+        , $7A , $7B , $78 , $79 , $7E , $7F , $58 , $59 , $56 , $57 , $50 , $51 , $28 , $29 , $10 , $11 , $12 , $13 , $14 , $15
+        , $16 , $17 , $18 , $19 , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $48 , $49 , $7C , $7D , $6E , $6F , $6C , $6D , $6A , $6B
+        , $68 , $69 , $50 , $51 , $28 , $29 , $30 , $31 , $32 , $33 , $34 , $35 , $36 , $37 , $38 , $39 , $C8 , $C9 , $C8 , $C9
+        , $C8 , $C9 , $48 , $49 , $7A , $7B , $70 , $71 , $72 , $73 , $76 , $77 , $64 , $65 , $66 , $67 , $28 , $29 , $1A , $1B
+        , $3A , $3B , $3C , $3D , $3E , $3F , $1C , $1D , $C8 , $C9 , $C8 , $C9 , $C8 , $C9 , $48 , $49 , $7C , $7D , $78 , $79
+        , $74 , $75 , $76 , $77 , $62 , $63 , $60 , $61 , $28 , $29 , $1E , $1F , $40 , $41 , $42 , $43 , $44 , $45 , $46 , $47
+        , $C8 , $C9 , $C8 , $C9,
+byte_91CD:   0, $28 , $26 , $28 , $B4 , $18 , $34 ,   7 , $B0 ,   7 , $A8 , $35 , $28 , $34 , $36 , $34 , $30 , $A7 , $AA , $A7 
+        , $B0 , $A8 , $AE , $A8 , $B4 , $79 , $AE , $29 , $A8 , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD 
+        , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $BD , $A2 
+    }
