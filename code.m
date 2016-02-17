@@ -1,5 +1,13 @@
 #rom.org $8160
 
+inline set_vic_irq_vector(line, addr)
+{
+    LDA #line
+    LDX #lo(addr)
+    LDY #hi(addr)
+    JSR sub_8CBA
+}
+
         SEI
 
 sub_8161:               
@@ -17,10 +25,7 @@ sub_8161:
 
 loc_817B:               
         JSR sub_8D0D
-        LDA #$B2
-        LDX #$85
-        LDY #$8B
-        JSR sub_8CBA
+        set_vic_irq_vector($B2, irq1)
         CLI
         LDX #$40
         LDA #0
@@ -812,10 +817,8 @@ sub_8627:               //g CODE XREF: sub_8161:loc_8364p
         JSR sub_8CE9
         LDX #$A
         JSR sub_84E6
-        LDA #$14
-        LDX #$45 //g 'E'
-        LDY #$8C //g 'Œ'
-        JSR sub_8CBA
+
+        set_vic_irq_vector($14, irq4)
         JSR sub_8DAA
         LDA #2
         JSR sub_8D20
@@ -893,10 +896,9 @@ sub_8694:
         STX $37
         JSR sub_8CE9
         JSR loc_8E12
-        LDA #$82 //g '‚'
-        LDX #$2F //g '/'
-        LDY #$8C //g 'Œ'
-        JSR sub_8CBA
+
+        set_vic_irq_vector($82, irq3)
+
         LDX #$14
         JSR sub_84E6
         JSR sub_8D18
@@ -1014,10 +1016,7 @@ loc_874A:               //g CODE XREF: ROM:8747j
         JSR sub_8CE9
         STX $50
         STX $51
-        LDA #$B2 //g '²'
-        LDX #$3A //g ':'
-        LDY #$8C //g 'Œ'
-        JSR sub_8CBA
+        set_vic_irq_vector($B2, irq2)
         LDX #$E
         STX $3D
         INX
@@ -1474,7 +1473,6 @@ sub_8A00:               //g CODE XREF: sub_89FDp
         INY
         RTS
 //g End of function sub_8A00
-
         LDA #$1A
         JSR sub_8C5F
         LDA $47
@@ -1811,11 +1809,14 @@ loc_8BF8:               //g CODE XREF: ROM:8BE3j  ROM:8C29j
 loc_8C2B:               //g CODE XREF: ROM:8BF6j
         LDA #$1E
         BNE loc_8C41
+irq3:
         LDA #$3A //g ':'
         JSR sub_8C5F
         LDA #$32 //g '2'
         LDX #$C0 //g 'À'
         BNE loc_8C4E
+
+irq2:
         LDA #$1A
         JSR sub_8C5F
         LDA #$1C
@@ -1823,6 +1824,7 @@ loc_8C2B:               //g CODE XREF: ROM:8BF6j
 loc_8C41:               //g CODE XREF: ROM:8C2Dj
         LDX #$D0 //g 'Ð'
         BNE loc_8C4E
+irq4:
         LDA #$1A
         JSR sub_8C5F
         LDA #$1A
